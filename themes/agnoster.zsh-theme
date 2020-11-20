@@ -72,6 +72,14 @@ prompt_segment() {
   [[ -n $3 ]] && echo -n $3
 }
 
+prompt_mysegment() {
+  local bg fg
+  [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
+  [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
+  echo -n "%{$bg%}%{$fg%}"
+  [[ -n $3 ]] && echo -n $3
+}
+
 # End the prompt, closing any open segments
 prompt_end() {
   if [[ -n $CURRENT_BG ]]; then
@@ -81,6 +89,23 @@ prompt_end() {
   fi
   echo -n "%{%f%}"
   CURRENT_BG=''
+}
+
+afmagic_dashes() {
+	local PYTHON_ENV="$VIRTUAL_ENV"
+  local str=""
+	[[ -z "$PYTHON_ENV" ]] && PYTHON_ENV="$CONDA_DEFAULT_ENV"
+
+  
+
+	if [[ -n "$PYTHON_ENV" && "$PS1" = \(* ]]; then
+		echo $(( COLUMNS - ${#PYTHON_ENV} - 3 ))
+	else
+		for _ in {1..$COLUMNS}; do
+      str="$str-"
+    done
+    prompt_mysegment default black $str
+	fi
 }
 
 ### Prompt components
@@ -245,6 +270,8 @@ prompt_aws() {
 ## Main prompt
 build_prompt() {
   RETVAL=$?
+  echo "\r"
+  afmagic_dashes
   prompt_status
   prompt_virtualenv
   prompt_aws
