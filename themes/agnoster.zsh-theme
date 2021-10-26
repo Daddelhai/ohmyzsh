@@ -99,7 +99,11 @@ afmagic_dashes() {
   
 
 	if [[ -n "$PYTHON_ENV" && "$PS1" = \(* ]]; then
-		echo $(( COLUMNS - ${#PYTHON_ENV} - 3 ))
+    for _ in {1..$COLUMNS}; do
+      str="$str-"
+    done
+    prompt_mysegment default black $str
+		#echo $(( COLUMNS - ${#PYTHON_ENV} - 3 ))
 	else
 		for _ in {1..$COLUMNS}; do
       str="$str-"
@@ -115,6 +119,17 @@ afmagic_dashes() {
 prompt_context() {
   if [[ "$USERNAME" != "$DEFAULT_USER" || -n "$SSH_CLIENT" ]]; then
     prompt_segment black default "%(!.%{%F{yellow}%}.)%n@%m"
+  fi
+}
+
+# Python virtualenv
+prompt_virtualenv() {
+	local PYTHON_ENV="$VIRTUAL_ENV"
+  local str=""
+	[[ -z "$PYTHON_ENV" ]] && PYTHON_ENV="$CONDA_DEFAULT_ENV"
+
+  if [[ -n "$PYTHON_ENV" ]]; then
+    prompt_segment green black "venv"
   fi
 }
 
@@ -233,12 +248,12 @@ prompt_dir() {
 }
 
 # Virtualenv: current working virtualenv
-prompt_virtualenv() {
-  local virtualenv_path="$VIRTUAL_ENV"
-  if [[ -n $virtualenv_path && -n $VIRTUAL_ENV_DISABLE_PROMPT ]]; then
-    prompt_segment blue black "(`basename $virtualenv_path`)"
-  fi
-}
+#prompt_virtualenv() {
+#  local virtualenv_path="$VIRTUAL_ENV"
+#  if [[ -n $virtualenv_path && -n $VIRTUAL_ENV_DISABLE_PROMPT ]]; then
+#    prompt_segment blue black "(`basename $virtualenv_path`)"
+#  fi
+#}
 
 # Status:
 # - was there an error
@@ -269,17 +284,17 @@ prompt_aws() {
 
 ## Main prompt
 build_prompt() {
+  echo -e "\r\033[K"
   RETVAL=$?
-  echo "\r"
   afmagic_dashes
   prompt_status
-  prompt_virtualenv
   prompt_aws
   prompt_context
   prompt_dir
   prompt_git
   prompt_bzr
   prompt_hg
+  prompt_virtualenv
   prompt_end
 }
 
